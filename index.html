@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1266cc">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Mi Nevera y Congelador</title>
+<style>
+:root{--blue:#1266cc;--pale:#eaf3ff;--green:#208542;--orange:#b85a00;--red:#b42318;--ink:#172033;--muted:#667085;--line:#d9e1ec;--bg:#f5f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--blue);color:white;padding:18px 16px 16px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}header h1{font-size:1.25rem;margin:0}header p{font-size:.86rem;margin:4px 0 0;opacity:.9}
+main{max-width:850px;margin:auto;padding:14px 12px 36px}.tabs,.actions,.row{display:flex;gap:8px}.tabs{margin-bottom:12px}.tabs button{flex:1}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 0}.btn,button{border:0;border-radius:12px;padding:12px 13px;font:inherit;font-weight:650;cursor:pointer}.btn-primary{background:var(--blue);color:white}.btn-green{background:#16803d;color:white}.btn-orange{background:#b85a00;color:white}.btn-soft{background:var(--pale);color:#174b8b}.btn-neutral{background:#e9edf3;color:#263246}.btn-danger{background:#fee4e2;color:#912018}.tab{background:#e2eaf5;color:#334155}.tab.active{background:var(--blue);color:white}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}.metric{background:white;border:1px solid var(--line);border-radius:12px;padding:11px}.metric b{display:block;font-size:1.3rem}.metric span{font-size:.78rem;color:var(--muted)}
+.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;margin:12px 0;box-shadow:0 1px 3px #15223808}.panel h2{font-size:1.05rem;margin:0 0 12px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}label{font-size:.84rem;font-weight:650;color:#344054}input,select,textarea{width:100%;min-width:0;border:1px solid #c8d1de;border-radius:9px;padding:11px 10px;font:inherit;background:white;color:var(--ink)}input:focus,select:focus{outline:2px solid #8bbaff;border-color:var(--blue)}.hint{font-size:.82rem;color:var(--muted);margin:8px 0 0}
+.toolbar{display:flex;gap:8px;margin-bottom:10px}.toolbar input{flex:1}.toolbar select{max-width:45%}.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:#fff}.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.item h3{font-size:1rem;margin:0 0 4px}.sub{color:var(--muted);font-size:.85rem}.qty{font-weight:750;font-size:1.05rem;white-space:nowrap}.badges{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}.badge{font-size:.75rem;border-radius:99px;padding:4px 8px;background:#e9f7ee;color:#176534}.badge.warn{background:#fff0d5;color:#8a4b00}.badge.danger{background:#fee4e2;color:#a21b12}.itembuttons{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}.itembuttons button{padding:8px 10px;font-size:.86rem}.empty{text-align:center;padding:22px;color:var(--muted)}.notice{padding:11px 12px;border-radius:10px;background:#fff4df;color:#804600;margin:8px 0;font-size:.9rem}.success{background:#e9f7ee;color:#176534}.hidden{display:none!important}.shoppingline{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}.shoppingline:last-child{border:0}.shoppingline input{width:20px;height:20px}.shoppingline .shopname{flex:1}.small{font-size:.82rem;color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px}
+@media(min-width:650px){.actions{grid-template-columns:repeat(3,minmax(0,1fr))}.inventory{display:grid;grid-template-columns:1fr 1fr;gap:12px}.inventory .panel{margin-top:0}}
+</style>
+</head>
+<body>
+<header><h1>🥬 Mi Nevera y Congelador</h1><p>Inventario, consumo, caducidad y lista de la compra</p></header>
+<main>
+  <div class="cards">
+    <div class="metric"><b id="metricProducts">0</b><span>Productos</span></div>
+    <div class="metric"><b id="metricExpiry">0</b><span>Por caducar</span></div>
+    <div class="metric"><b id="metricBuy">0</b><span>Por comprar</span></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-location="Todos">Todo</button>
+    <button class="tab" data-location="Nevera">🧊 Nevera</button>
+    <button class="tab" data-location="Congelador">❄️ Congelador</button>
+    <button class="tab" data-location="Despensa">🧺 Despensa</button>
+  </div>
+  <section class="panel">
+    <h2 id="productFormTitle">Añadir producto</h2>
+    <form id="productForm">
+      <input type="hidden" id="editId">
+      <div class="formgrid">
+        <div class="field full"><label for="name">Nombre del producto *</label><input id="name" required maxlength="80" placeholder="Ej. Leche, pollo, guisantes"></div>
+        <div class="field"><label for="location">Ubicación *</label><select id="location"><option>Nevera</option><option>Congelador</option><option>Despensa</option></select></div>
+        <div class="field"><label for="category">Categoría</label><select id="category"><option>Otros</option><option>Verdura y fruta</option><option>Carne</option><option>Pescado</option><option>Lácteos</option><option>Huevos</option><option>Platos preparados</option><option>Pan y bollería</option><option>Congelados</option><option>Bebidas</option></select></div>
+        <div class="field"><label for="quantity">Cantidad actual *</label><input id="quantity" required type="number" min="0" step="any" placeholder="Ej. 1.5"></div>
+        <div class="field"><label for="unit">Unidad *</label><select id="unit"><option>ud.</option><option>kg</option><option>g</option><option>l</option><option>ml</option><option>paquete</option><option>ración</option></select></div>
+        <div class="field"><label for="expiry">Fecha de caducidad / consumo preferente</label><input id="expiry" type="date"></div>
+        <div class="field"><label for="minimum">Avisar para comprar cuando queden</label><input id="minimum" type="number" min="0" step="any" value="0"><span class="small">Pon 0 si no quieres aviso de reposición.</span></div>
+        <div class="field full"><label for="notes">Notas (opcional)</label><input id="notes" maxlength="160" placeholder="Ej. abierto, en un táper..."></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" id="saveProduct">Guardar producto</button>
+        <button class="btn btn-neutral" type="button" id="cancelEdit">Cancelar edición</button>
+      </div>
+      <p class="hint">Para añadir más cantidad de un producto ya existente, usa «Entrada». Para registrar consumo o retirada, usa «Salida».</p>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>Mis productos</h2>
+    <div class="toolbar"><input id="search" placeholder="Buscar producto…"><select id="sort"><option value="name">Orden alfabético</option><option value="expiry">Caducidad más próxima</option><option value="quantity">Menor cantidad primero</option></select></div>
+    <div id="inventory" class="inventory"></div>
+  </section>
+  <section class="panel">
+    <h2>🛒 Lista de la compra</h2>
+    <p class="hint">Se genera automáticamente con los productos que están en su nivel mínimo o por debajo. También puedes añadir artículos manualmente.</p>
+    <form id="shoppingForm" class="row" style="margin-top:10px"><input id="shoppingName" aria-label="Artículo para comprar" placeholder="Añadir artículo…" required><button class="btn btn-primary" type="submit">Añadir</button></form>
+    <div id="shoppingList"></div>
+    <div class="itembuttons"><button class="btn btn-soft" id="clearChecked" type="button">Quitar marcados</button></div>
+  </section>
+  <section class="panel">
+    <h2>📅 Avisos de caducidad</h2>
+    <div id="expiryAlerts"></div>
+  </section>
+  <section class="panel">
+    <h2>Historial de movimientos</h2>
+    <p class="hint">Se guardan las últimas entradas, salidas y cambios de inventario en este móvil.</p>
+    <div id="history"></div>
+    <div class="itembuttons"><button class="btn btn-soft" id="exportBtn" type="button">Exportar copia de seguridad</button><button class="btn btn-soft" id="importBtn" type="button">Importar copia</button><input id="importFile" type="file" accept="application/json" class="hidden"></div>
+    <p class="hint">Los datos se guardan en el almacenamiento del navegador de este dispositivo. Exporta una copia de vez en cuando para no perderlos si borras los datos del navegador.</p>
+  </section>
+  <footer>Mi Nevera y Congelador · Aplicación local, sin cuenta ni conexión necesaria</footer>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const KEY='miNeveraCongelador_v1';
+let state={products:[],history:[],shopping:[],filter:'Todos'};
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'{}');state.products=Array.isArray(x.products)?x.products:[];state.history=Array.isArray(x.history)?x.history:[];state.shopping=Array.isArray(x.shopping)?x.shopping:[]}catch(e){}}
+function persist(){localStorage.setItem(KEY,JSON.stringify({products:state.products,history:state.history,shopping:state.shopping}));render()}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function num(v){return Number(v)||0}
+function fmt(n){return new Intl.NumberFormat('es-ES',{maximumFractionDigits:3}).format(n)}
+function dateText(s){if(!s)return 'Sin fecha';let d=new Date(s+'T12:00:00');return d.toLocaleDateString('es-ES')}
+function daysTo(s){if(!s)return null;const a=new Date();a.setHours(0,0,0,0);const b=new Date(s+'T00:00:00');return Math.round((b-a)/86400000)}
+function log(action,p,amount,detail=''){state.history.unshift({id:id(),date:new Date().toISOString(),action,name:p.name,amount,unit:p.unit,location:p.location,detail});state.history=state.history.slice(0,100)}
+function clearForm(){ $('productForm').reset();$('editId').value='';$('minimum').value='0';$('productFormTitle').textContent='Añadir producto';$('saveProduct').textContent='Guardar producto';}
+function startEdit(p){$('editId').value=p.id;$('name').value=p.name;$('location').value=p.location;$('category').value=p.category||'Otros';$('quantity').value=p.quantity;$('unit').value=p.unit;$('expiry').value=p.expiry||'';$('minimum').value=p.minimum||0;$('notes').value=p.notes||'';$('productFormTitle').textContent='Editar producto';$('saveProduct').textContent='Guardar cambios';window.scrollTo({top:0,behavior:'smooth'})}
+$('productForm').addEventListener('submit',e=>{e.preventDefault();const edit=$('editId').value;const p={id:edit||id(),name:$('name').value.trim(),location:$('location').value,category:$('category').value,quantity:num($('quantity').value),unit:$('unit').value,expiry:$('expiry').value,minimum:num($('minimum').value),notes:$('notes').value.trim()};if(!p.name)return;const old=state.products.find(x=>x.id===edit);if(old){const delta=p.quantity-old.quantity;Object.assign(old,p);if(delta!==0)log('Ajuste',p,delta,`Cantidad ajustada de ${fmt(old.quantity-delta)} a ${fmt(p.quantity)}`)}else{state.products.push(p);log('Alta',p,p.quantity,'Producto añadido')}clearForm();persist()});
+$('cancelEdit').addEventListener('click',clearForm);
+function movement(pid,kind){const p=state.products.find(x=>x.id===pid);if(!p)return;const raw=prompt(kind==='Entrada'?`¿Cuánto añades a ${p.name}? (${p.unit})`:`¿Cuánto retiras de ${p.name}? (${p.unit})`,'1');if(raw===null)return;const q=Number(raw.replace(',','.'));if(!Number.isFinite(q)||q<=0){alert('Introduce una cantidad mayor que cero.');return}if(kind==='Salida'&&q>p.quantity){if(!confirm(`Solo quedan ${fmt(p.quantity)} ${p.unit}. ¿Quieres dejar la cantidad a cero?`))return;p.quantity=0}else p.quantity=Math.max(0,p.quantity+(kind==='Entrada'?q:-q));log(kind,p,kind==='Entrada'?q:-q);persist()}
+function del(pid){const p=state.products.find(x=>x.id===pid);if(p&&confirm(`¿Eliminar ${p.name} del inventario?`)){log('Eliminación',p,p.quantity,'Producto eliminado');state.products=state.products.filter(x=>x.id!==pid);persist()}}
+function addToShopping(name,source='manual'){if(state.shopping.some(x=>x.name.toLowerCase()===name.toLowerCase()))return;state.shopping.push({id:id(),name,source,checked:false});}
+function updateAutoShopping(){state.products.forEach(p=>{const low=p.minimum>0&&p.quantity<=p.minimum;const existing=state.shopping.find(x=>x.source==='auto'&&x.productId===p.id);if(low&&!existing)state.shopping.push({id:id(),name:p.name,source:'auto',productId:p.id,checked:false});if(!low&&existing)state.shopping=state.shopping.filter(x=>x.id!==existing.id)})}
+$('shoppingForm').addEventListener('submit',e=>{e.preventDefault();const n=$('shoppingName').value.trim();if(n){addToShopping(n);$('shoppingName').value='';persist()}});
+$('clearChecked').addEventListener('click',()=>{state.shopping=state.shopping.filter(x=>!x.checked);persist()});
+function renderInventory(){const query=$('search').value.trim().toLowerCase();const sort=$('sort').value;let ps=state.products.filter(p=>(state.filter==='Todos'||p.location===state.filter)&&p.name.toLowerCase().includes(query));ps.sort((a,b)=>sort==='expiry'?((a.expiry||'9999').localeCompare(b.expiry||'9999')):sort==='quantity'?a.quantity-b.quantity:a.name.localeCompare(b.name,'es'));const host=$('inventory');if(!ps.length){host.innerHTML='<div class="empty">No hay productos que mostrar. Añade el primero en el formulario.</div>';return}const groups=state.filter==='Todos'?['Nevera','Congelador','Despensa']:[state.filter];host.innerHTML=groups.map(g=>{const items=ps.filter(p=>p.location===g);if(!items.length)return '';return `<div><h2 style="margin:12px 2px 6px">${g==='Nevera'?'🧊':g==='Congelador'?'❄️':'🧺'} ${g}</h2>${items.map(p=>{const d=daysTo(p.expiry);let badge=d===null?`<span class="badge">Sin fecha</span>`:d<0?`<span class="badge danger">Caducado hace ${Math.abs(d)} día(s)</span>`:d<=3?`<span class="badge danger">${d===0?'Caduca hoy':`Caduca en ${d} día(s)`}</span>`:d<=7?`<span class="badge warn">Caduca en ${d} días</span>`:`<span class="badge">Caduca: ${dateText(p.expiry)}</span>`;if(p.minimum>0&&p.quantity<=p.minimum)badge+=`<span class="badge warn">Reponer</span>`;return `<article class="item"><div class="itemtop"><div><h3>${esc(p.name)}</h3><div class="sub">${esc(p.category||'Otros')}${p.notes?' · '+esc(p.notes):''}</div></div><div class="qty">${fmt(p.quantity)} ${esc(p.unit)}</div></div><div class="badges">${badge}</div><div class="sub">Aviso de compra: ${p.minimum>0?fmt(p.minimum)+' '+esc(p.unit):'desactivado'}</div><div class="itembuttons"><button class="btn btn-green" data-act="in" data-id="${p.id}">＋ Entrada</button><button class="btn btn-orange" data-act="out" data-id="${p.id}">− Salida</button><button class="btn btn-soft" data-act="edit" data-id="${p.id}">Editar</button><button class="btn btn-danger" data-act="del" data-id="${p.id}">Eliminar</button></div></article>`}).join('')}</div>`}).join('')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('inventory').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;const p=state.products.find(x=>x.id===b.dataset.id);if(!p)return;switch(b.dataset.act){case'in':movement(p.id,'Entrada');break;case'out':movement(p.id,'Salida');break;case'edit':startEdit(p);break;case'del':del(p.id);break}});
+function renderShopping(){updateAutoShopping();const host=$('shoppingList');if(!state.shopping.length){host.innerHTML='<div class="empty">Tu lista está vacía. Los productos por debajo del mínimo aparecerán aquí automáticamente.</div>';return}host.innerHTML=state.shopping.map(x=>`<div class="shoppingline"><input type="checkbox" data-shop-check="${x.id}" ${x.checked?'checked':''} aria-label="Marcar ${esc(x.name)}"><div class="shopname"><strong>${esc(x.name)}</strong><div class="small">${x.source==='auto'?'Añadido automáticamente por existencias bajas':'Añadido manualmente'}</div></div><button class="btn btn-danger" data-shop-del="${x.id}" style="padding:7px 10px">Quitar</button></div>`).join('')}
+$('shoppingList').addEventListener('change',e=>{const c=e.target.closest('[data-shop-check]');if(!c)return;const x=state.shopping.find(x=>x.id===c.dataset.shopCheck);if(x)x.checked=c.checked;localStorage.setItem(KEY,JSON.stringify({products:state.products,history:state.history,shopping:state.shopping}))});
+$('shoppingList').addEventListener('click',e=>{const b=e.target.closest('[data-shop-del]');if(!b)return;state.shopping=state.shopping.filter(x=>x.id!==b.dataset.shopDel);persist()});
+function renderExpiry(){const due=state.products.map(p=>({...p,d:daysTo(p.expiry)})).filter(p=>p.d!==null&&p.d<=7).sort((a,b)=>a.d-b.d);$('expiryAlerts').innerHTML=due.length?due.map(p=>`<div class="notice ${p.d<0?'':'warn'}"><strong>${esc(p.name)}</strong> · ${p.d<0?'caducado hace '+Math.abs(p.d)+' día(s)':p.d===0?'caduca hoy':`caduca en ${p.d} día(s)`} (${dateText(p.expiry)}) — ${esc(p.location)}</div>`).join(''):'<div class="notice success">No hay productos que caduquen en los próximos 7 días.</div>'}
+function renderHistory(){const h=$('history');if(!state.history.length){h.innerHTML='<div class="empty">Todavía no hay movimientos registrados.</div>';return}h.innerHTML=state.history.slice(0,20).map(x=>`<div class="shoppingline"><div style="flex:1"><strong>${esc(x.action)}: ${esc(x.name)}</strong><div class="small">${new Date(x.date).toLocaleString('es-ES')} · ${esc(x.location||'')} ${x.detail?'· '+esc(x.detail):''}</div></div><strong>${x.amount>0?'+':''}${fmt(x.amount)} ${esc(x.unit||'')}</strong></div>`).join('')}
+function render(){updateAutoShopping();$('metricProducts').textContent=state.products.length;$('metricExpiry').textContent=state.products.filter(p=>{const d=daysTo(p.expiry);return d!==null&&d<=3}).length;$('metricBuy').textContent=state.shopping.filter(x=>!x.checked).length;renderInventory();renderShopping();renderExpiry();renderHistory();localStorage.setItem(KEY,JSON.stringify({products:state.products,history:state.history,shopping:state.shopping}))}
+document.querySelectorAll('[data-location]').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.location;document.querySelectorAll('[data-location]').forEach(x=>x.classList.toggle('active',x===b));renderInventory()}));
+$('search').addEventListener('input',renderInventory);$('sort').addEventListener('change',renderInventory);
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({products:state.products,history:state.history,shopping:state.shopping},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='copia-nevera-congelador.json';a.click();URL.revokeObjectURL(a.href)});
+$('importBtn').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!Array.isArray(x.products)||!confirm('La importación reemplazará los datos actuales. ¿Continuar?'))return;state.products=x.products;state.history=Array.isArray(x.history)?x.history:[];state.shopping=Array.isArray(x.shopping)?x.shopping:[];persist();alert('Copia importada correctamente.')}catch(err){alert('No se ha podido leer la copia.')}e.target.value=''});
+load();render();
+})();
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>

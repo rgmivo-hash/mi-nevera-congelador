@@ -1,0 +1,9 @@
+MI NEVERA Y CONGELADOR — PAQUETE INSTALABLE
+
+La carpeta contiene index.html, manifest.json, sw.js e iconos.
+
+Para instalar como aplicación PWA en Android, publica estos archivos en una web con HTTPS. Abrir el HTML desde Descargas permite probarlo, pero no activa la instalación PWA ni el modo sin conexión.
+
+En Android: abre la dirección HTTPS con Chrome, pulsa ⋮ y elige “Instalar aplicación” o “Añadir a pantalla de inicio”.
+
+Los datos se guardan localmente en el navegador. Exporta copias de seguridad periódicamente.
